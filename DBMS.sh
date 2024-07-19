@@ -1,5 +1,8 @@
 #!/usr/bin/bash
 
+
+# Welcome 
+
 welcome() {
     clear
     echo "####################################################"
@@ -19,6 +22,8 @@ welcome() {
     echo
 }
 
+# Main Menu
+
 mainmenu(){
     clear
     welcome
@@ -31,21 +36,28 @@ mainmenu(){
     echo ""
     echo "0. Exit"
     echo ""
+
     read -p "Enter the number of your choose: " x
 
     case $x in
     1) echo "number 1";;
     2) echo "number 2";;
-    3) echo "number 3"; connectmenu;;
+    3) echo "number 3";welcome;existingdb;connectmenu;;
     4) echo "number 4";;
-    0) exit;;
-    esac
+    0) quit;;
+    *) echo "Invalid Input"; sleep 2; mainmenu;;
+    esac   
 }
 
+# Connect Menu
+
 connectmenu(){
+    
     clear
     welcome
-    echo ""
+    
+    echo "Database : $choosendb "
+    echo
     echo "Connect Menu: "
     echo ""
     echo "1. Create Table"
@@ -60,6 +72,7 @@ connectmenu(){
     echo ""
     echo "0. Exit"
     echo ""
+
     read -p "Enter the number of your choose: " x
 
     case $x in
@@ -71,13 +84,66 @@ connectmenu(){
     6) echo "number 6";;
     7) echo "number 7";;
     8) echo "number 8"; mainmenu;;
-    0) exit;;
+    0) quit;;
+    *) echo "Invalid Input"; sleep 2; connectmenu;;
     esac
+    
 }
 
-while true
-do
+choosendb=
+
+# Checking the existing Databases
+
+existingdb(){
+    
+    while true
+    do
+    clear
+    welcome 
+    echo ""
+    echo "Existing Database."
+    echo ""
+    
+    databases=($(ls -d [a-zA-Z]*/))
+    counter=0
+    
+    for i in "${databases[@]}"
+    do
+      echo "$((counter+1)).  ${i%?}"
+      counter=$((counter+1))
+    done
+
+    echo ""
+    echo "$((counter+1)). Exit"
+    echo ""
+
+    read -p "Enter the number of your choice : " choosendb
+    if [[ $choosendb -gt 0 && $choosendb -le $counter ]] 2>/dev/null;
+    then
+        choosendb=${databases[$((choosendb-1))]%/}
+        break
+    elif [[ $choosendb -eq $((counter+1)) ]] 2>/dev/null;
+    then        
+        quit
+        continue
+    else
+        echo "Invalid Input"
+        sleep 1
+    fi
+    done
+}
+
+# Exit function
+
+quit(){
+
+    echo ""
+    read -p "Do you want really to Exit? (y/n)" x   
+    
+    if [[ $x =~ ^[Yy] ]]; 
+    then
+        exit
+    fi
+}
+
 mainmenu
-done
-
-
