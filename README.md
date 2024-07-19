@@ -21,7 +21,7 @@ The Bash Project DBMS is designed to help users manage data through a command-li
 
 ## Contributing
 
-Both the maintainers and contributors, whether FadyM66 and BasmalaSalem , appreciate your input and look forward to collaborating on improving the project!
+Both the maintainers and contributors, whether **[Fady Mohsen](https://github.com/FadyM66)** and **[Basmala Salem](https://github.com/BasmalaSalem)** , appreciate your input and look forward to collaborating on improving the project!
 
 
 ## Features
