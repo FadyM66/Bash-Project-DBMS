@@ -1,4 +1,3 @@
-# Bash-Project-DBMS
 # Bash Project DBMS
 
 Welcome to the Bash Project DBMS! This project is a simple database management system implemented using bash scripts.
