@@ -1,5 +1,8 @@
 #!/usr/bin/bash
 
+# Source other function scripts
+source ./create_database.sh
+source ./list_databases.sh
 
 # Welcome 
 
@@ -52,8 +55,8 @@ mainmenu(){
     read -p "Enter the number of your choose: " x
 
     case $x in
-    1) echo "number 1";;
-    2) echo "number 2";;
+    1) create_database;;
+    2) list_databases;;
     3) welcome;connectmenu;;
     4) dropdb;;
     0) quit;mainmenu;;
