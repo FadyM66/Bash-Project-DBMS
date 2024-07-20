@@ -3,6 +3,13 @@
 # Source other function scripts
 source ./create_database.sh
 source ./list_databases.sh
+source ./create_table.sh
+source ./list_tables.sh
+source ./drop_table.sh
+source ./insert_into_table.sh
+source ./select_from_table.sh
+source ./delete_from_table.sh
+source ./update_table.sh
 
 # Welcome 
 
@@ -52,9 +59,9 @@ mainmenu(){
     echo "0. Exit"
     echo ""
 
-    read -p "Enter the number of your choose: " x
+    read -p "Enter the number of your choose: " choice
 
-    case $x in
+    case $choice in
     1) create_database;;
     2) list_databases;;
     3) welcome;connectmenu;;

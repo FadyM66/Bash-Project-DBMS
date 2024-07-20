@@ -1,12 +1,17 @@
 #!/bin/bash
+source ./validation.sh
 
 create_database() {
-    read -p "Enter database name: " db_name
-    if [ -d "$db_name" ]; then
-        echo "Database already exists!"
-    else
-        mkdir "$db_name"
-        echo "Database created successfully."
+    read -p "Enter database name: " dbname
+    dbname=$(sanitize_name "$dbname")
+    if ! is_valid_name "$dbname"; then
+        echo "Invalid database name. Only alphanumeric characters and underscores are allowed."
+        return
     fi
-    mainmenu
+    if dir_exists "$dbname"; then
+        echo "Database '$dbname' already exists."
+        return
+    fi
+    mkdir "$dbname"
+    echo "Database '$dbname' created successfully."
 }
