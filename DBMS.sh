@@ -108,7 +108,7 @@ connectmenu(){
         read -p "Enter the number of your choose: " x
 
         case $x in
-        1) echo "number 1";;
+        1) create_table "$choosendb";;
         2) echo "number 2";;
         3) echo "number 3";;
         4) echo "number 4";;
