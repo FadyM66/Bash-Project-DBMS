@@ -1,13 +1,28 @@
 #!/bin/bash
 
 list_databases() {
-    databases=(*/)
-    if [ ${#databases[@]} -eq 0 ]; then
-        echo "No databases yet."
+
+    clear
+    welcome
+    echo ""
+    echo "Existing Databases:"
+    echo ""
+
+    databases=($(ls -d [a-zA-Z]*/ 2>/dev/null)) 
+    numberofdatabases=${#databases[@]}
+
+    if [ $numberofdatabases -eq 0 ]; then
+        echo "No Databases found."
     else
-        echo "Databases:"
+        counter=1
         for db in "${databases[@]}"; do
-            echo "${db%/}"
+            echo "$counter. ${db%/}"
+            counter=$((counter + 1))
         done
     fi
+
+    echo ""
+    echo "Press any key to return to the main menu..."
+    read -n 1
+    mainmenu
 }
