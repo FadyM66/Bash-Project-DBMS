@@ -109,7 +109,7 @@ connectmenu(){
 
         case $x in
         1) create_table "$choosendb";;
-        2) echo "number 2";;
+        2) list_tables "$choosendb";;
         3) echo "number 3";;
         4) echo "number 4";;
         5) echo "number 5";;

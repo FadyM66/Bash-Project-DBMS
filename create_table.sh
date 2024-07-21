@@ -54,6 +54,8 @@ create_table() {
     echo "$columns" > "$tablename"
     echo "Table '$tablename' created successfully in the '$db_path' database."
 
+
+    cd ..
     mainmenu
 }
 
