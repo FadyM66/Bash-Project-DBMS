@@ -14,4 +14,6 @@ create_database() {
     fi
     mkdir "$dbname"
     echo "Database '$dbname' created successfully."
+
+    mainmenu
 }
