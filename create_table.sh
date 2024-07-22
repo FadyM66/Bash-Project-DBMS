@@ -9,7 +9,10 @@ create_table() {
     fi
 
     # pwd
-    cd "$db_path" || { echo "Failed to navigate to database directory."; return; }
+    cd "$db_path" || {
+        echo "Failed to navigate to database directory."
+        return
+    }
     # pwd
 
     local tablename
@@ -26,7 +29,6 @@ create_table() {
         fi
     done
 
-
     local columns
     local primary_key
     while true; do
@@ -37,7 +39,7 @@ create_table() {
             continue
         fi
 
-        IFS=';' read -r -a colarray <<< "$columns"
+        IFS=';' read -r -a colarray <<<"$columns"
         local valid=true
         local col_names=()
         for col in "${colarray[@]}"; do
@@ -68,7 +70,7 @@ create_table() {
         fi
     done
 
-    echo "$columns;primary_key:$primary_key" > "$tablename"
+    echo "$columns;primary_key:$primary_key" >"$tablename"
     echo "Table '$tablename' with primary key '$primary_key' created successfully in the '$db_path' database."
 
     sleep 3
