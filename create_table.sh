@@ -29,8 +29,8 @@ create_table() {
 
     local columns
     while true; do
-        read -p "Enter columns (name:type) separated by space (e.g., id:int name:string age:float): " columns
-        IFS=' ' read -r -a colarray <<< "$columns"
+        read -p "Enter columns (name:type) separated by semicolon (e.g., id:int;name:string;age:float): " columns
+        IFS=';' read -r -a colarray <<< "$columns"
         local valid=true
         for col in "${colarray[@]}"; do
             name=$(echo "$col" | cut -d: -f1)
