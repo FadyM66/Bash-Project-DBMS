@@ -28,10 +28,18 @@ create_table() {
 
 
     local columns
+    local primary_key
     while true; do
         read -p "Enter columns (name:type) separated by semicolon (e.g., id:int;name:string;age:float): " columns
+
+        if [[ "$columns" != *";"* ]]; then
+            echo "Invalid input. The columns must be separated by a semicolon (;). Please try again."
+            continue
+        fi
+
         IFS=';' read -r -a colarray <<< "$columns"
         local valid=true
+        local col_names=()
         for col in "${colarray[@]}"; do
             name=$(echo "$col" | cut -d: -f1)
             type=$(echo "$col" | cut -d: -f2)
@@ -45,17 +53,25 @@ create_table() {
                 valid=false
                 break
             fi
+            col_names+=("$name")
         done
         if $valid; then
+            while true; do
+                read -p "Enter the name of the primary key column: " primary_key
+                if [[ " ${col_names[@]} " =~ " ${primary_key} " ]]; then
+                    break
+                else
+                    echo "Invalid primary key column name. Please enter one of the column names."
+                fi
+            done
             break
         fi
     done
 
-    echo "$columns" > "$tablename"
-    echo "Table '$tablename' created successfully in the '$db_path' database."
+    echo "$columns;primary_key:$primary_key" > "$tablename"
+    echo "Table '$tablename' with primary key '$primary_key' created successfully in the '$db_path' database."
 
-
+    sleep 3
     cd ..
     mainmenu
 }
-
