@@ -106,13 +106,13 @@ check_name() {
         ;;
     esac
 }
-check_dataType(){
-    case $1 in 
-         [iI][nN][tT]|[sS][tT][rR][iI][nN][gG])
-            echo "-1"
+check_dataType() {
+    case $1 in
+    [iI][nN][tT] | [sS][tT][rR][iI][nN][gG])
+        echo "-1"
         ;;
-        *)
-            echo "1"
+    *)
+        echo "1"
         ;;
     esac
 }

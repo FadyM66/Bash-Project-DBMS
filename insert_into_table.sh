@@ -1,91 +1,99 @@
 #!/bin/bash
+source ./validation.sh
 
-# Function to insert data into a table
 insert_into_table() {
-    local db_path=$1
+    # local DBName="$1"
+    # local TableName="$2"
 
-    # Check if the provided path is a directory
-    if ! dir_exists "$db_path"; then
-        echo "Invalid database path '$db_path'."
+    local DBName="db1"
+    local TableName="t1"
+
+    # Check if the database and table exist
+    if [[ ! -f "$DBName/$TableName" ]]; then
+        echo "Error: Database or table not found."
         return
     fi
 
-    cd "$db_path" || {
-        echo "Failed to navigate to database directory."
-        return
-    }
+    # Read field names, data types, and primary key information from metadata
+    local metadata
+    metadata=$(awk '/^# / {print $0}' "$DBName/$TableName")
+    local numOfFields
+    numOfFields=$(echo "$metadata" | wc -l)
 
-    # List tables in the selected database
-    echo "Available tables:"
-    ls
-    read -p "Enter the table name to insert data into: " tablename
+    # Prepare arrays for field names, data types, and PK flags
+    local Name=()
+    local DataType=()
+    local PK=()
 
-    if ! file_exists "$tablename"; then
-        echo "Table '$tablename' does not exist."
-        cd ..
-        return
-    fi
+    # while IFS=: read -r _ fieldName fieldType pkFlag; do
+    #     Name+=("$fieldName")
+    #     DataType+=("$fieldType")
+    #     PK+=("${pkFlag:-x}")  # Default to "x" if pkFlag is empty
+    # done <<<"$metadata"
 
-    # Read the table schema
-    local schema
-    schema=$(head -n 1 "$tablename")
-    IFS=';' read -r -a columns <<<"$schema"
+    # Extract the name, data type, and primary key indicator from metadata lines
+    Name=($(awk -F: '/^#/ {print $1}' "$DBName/$TableName" | sed 's/# //'))
+    DataType=($(awk -F: '/^#/ {print $2}' "$DBName/$TableName"))
+    PK=($(awk -F: '/^#/ {print ($3 == "" ? "x" : $3)}' "$DBName/$TableName"))
 
-    declare -A data
-    local primary_key=""
-    local primary_key_value=""
 
-    # Identify the primary key from the schema
-    for col in "${columns[@]}"; do
-        if [[ "$col" == primary_key:* ]]; then
-            primary_key=$(echo "$col" | cut -d: -f2)
-        fi
-    done
-
-    # Prompt for data input and validate against the schema
-    for col in "${columns[@]}"; do
-        name=$(echo "$col" | cut -d: -f1)
-        type=$(echo "$col" | cut -d: -f2)
-
-        # Skip the primary_key indicator in schema
-        if [[ "$name" == "primary_key" ]]; then
-            continue
-        fi
-
+    # Loop to get values for each field
+    for ((i = 0; i < numOfFields; i++)); do
         while true; do
-            read -p "Enter value for $name ($type): " value
-            if validate_value "$value" "$type"; then
-                if [[ "$name" == "$primary_key" ]]; then
-                    primary_key_value="$value"
-                    # Check if primary key value is unique
-                    if cut -d';' -f1 "$tablename" | grep -q "^$primary_key_value$"; then
-                        echo "Primary key value '$primary_key_value' already exists. Please enter a unique value."
-                        continue
-                    fi
+            # Prompt user for field value
+            read -p "Enter value for ${Name[$i]}: " FieldName
+          
+            # Validate integer data type
+            if [[ ${DataType[$i]} == "int" ]]; then
+                echo $DataType
+                checkValue=$(is_integer "$FieldName")
+                if [[ $checkValue == 1 ]]; then
+                    echo "Invalid input. Please enter an integer for ${Name[$i]}."
+                    continue
                 fi
-                data["$name"]="$value"
-                break
-            else
-                echo "Invalid value for type '$type'. Please try again."
+            elif [[ ${DataType[$i]} == "string" ]]; then
+                echo $DataType
+                FieldName=$(is_valid_name "$FieldName")
+
+                if [[ $FieldName == 1 ]]; then
+                    echo "Invalid input. Please enter an string for ${Name[$i]}."
+                    continue
+                fi
+
             fi
+
+            # Handle primary key uniqueness check
+            if [[ ${PK[$i]} == "pk" ]]; then
+                flag=0
+                values=($(awk -F: -v col=$((i + 1)) '$1 !~ /^#/ {print $col}' "$DBName/$TableName"))
+                for value in "${values[@]}"; do
+                    if [[ $FieldName == "$value" ]]; then
+                        flag=1
+                        break
+                    fi
+                done
+
+                if [[ $flag == 1 ]]; then
+                    echo "Error: Value for ${Name[$i]} must be unique. It is a primary key."
+                    continue
+                fi
+            fi
+
+            # Append field value to the table
+            if [[ $i == 0 ]]; then
+                echo -n "$FieldName" >>"$DBName/$TableName"
+            else
+                echo -n ":$FieldName" >>"$DBName/$TableName"
+            fi
+
+            break
         done
     done
 
-    # Construct the data line to be inserted
-    local dataline=""
-    for col in "${columns[@]}"; do
-        name=$(echo "$col" | cut -d: -f1)
-        if [[ "$name" != "primary_key" ]]; then
-            dataline+="${data[$name]};"
-        fi
-    done
-    dataline=${dataline%;} # Remove the trailing semicolon
-
-    # Append the data line to the table file
-    echo "$dataline" >> "$tablename"
-    echo "Data inserted successfully into '$tablename'."
-
-    sleep 2
-    cd ..
-    mainmenu
+    # Add a newline at the end of the record
+    echo "" >>"$DBName/$TableName"
+    echo "Record inserted successfully."
 }
+
+insert_into_table
+
