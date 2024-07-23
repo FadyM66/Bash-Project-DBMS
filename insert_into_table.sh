@@ -25,34 +25,24 @@ insert_into_table() {
     local DataType=()
     local PK=()
 
-    # while IFS=: read -r _ fieldName fieldType pkFlag; do
-    #     Name+=("$fieldName")
-    #     DataType+=("$fieldType")
-    #     PK+=("${pkFlag:-x}")  # Default to "x" if pkFlag is empty
-    # done <<<"$metadata"
-
     # Extract the name, data type, and primary key indicator from metadata lines
     Name=($(awk -F: '/^#/ {print $1}' "$DBName/$TableName" | sed 's/# //'))
     DataType=($(awk -F: '/^#/ {print $2}' "$DBName/$TableName"))
     PK=($(awk -F: '/^#/ {print ($3 == "" ? "x" : $3)}' "$DBName/$TableName"))
 
-
     # Loop to get values for each field
     for ((i = 0; i < numOfFields; i++)); do
         while true; do
-            # Prompt user for field value
             read -p "Enter value for ${Name[$i]}: " FieldName
-          
-            # Validate integer data type
+
             if [[ ${DataType[$i]} == "int" ]]; then
-                echo $DataType
-                checkValue=$(is_integer "$FieldName")
+                checkValue=$(check_is_int "$FieldName")
+
                 if [[ $checkValue == 1 ]]; then
                     echo "Invalid input. Please enter an integer for ${Name[$i]}."
                     continue
                 fi
             elif [[ ${DataType[$i]} == "string" ]]; then
-                echo $DataType
                 FieldName=$(is_valid_name "$FieldName")
 
                 if [[ $FieldName == 1 ]]; then
@@ -96,4 +86,3 @@ insert_into_table() {
 }
 
 insert_into_table
-
