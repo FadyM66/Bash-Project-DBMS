@@ -51,32 +51,42 @@ insert_into_table() {
 
     # Read field names, data types, and primary key information from metadata
     local metadata
-    metadata=$(awk '/^# / {print $0}' "$DBName/$TableName")
-    local numOfFields
-    numOfFields=$(echo "$metadata" | wc -l)
-
-    # Prepare arrays for field names, data types, and PK flags
+    metadata=$(awk '/^# / {print $0}' "$DBName/$TableName" | sed 's/# //')
+    
+    # Split metadata by semicolon and populate arrays
+    IFS=';' read -ra fields <<< "$metadata"
     local Name=()
     local DataType=()
     local PK=()
 
-    # Extract the name, data type, and primary key indicator from metadata lines
-    Name=($(awk -F: '/^#/ {print $1}' "$DBName/$TableName" | sed 's/# //'))
-    DataType=($(awk -F: '/^#/ {print $2}' "$DBName/$TableName"))
-    PK=($(awk -F: '/^#/ {print ($3 == "" ? "x" : $3)}' "$DBName/$TableName"))
+    for field in "${fields[@]}"; do
+        IFS=':' read -r name datatype pk_flag <<< "$field"
+        Name+=("$name")
+        DataType+=("$datatype")
+        PK+=("${pk_flag:-x}")
+    done
+
+    local numOfFields=${#Name[@]}
 
     # Loop to get values for each field
     for ((i = 0; i < numOfFields; i++)); do
         while true; do
-            read -p "Enter value for ${Name[$i]}: " FieldName
+            read -p "Enter value for ${Name[$i]}: " FieldValue
 
+            # Check data type
             if [[ ${DataType[$i]} == "int" ]]; then
-                checkValue=$(check_is_int "$FieldName")
+                checkValue=$(check_is_int "$FieldValue")
 
                 if [[ $checkValue == 1 ]]; then
                     echo "Invalid input. Please enter an integer for ${Name[$i]}."
                     continue
                 fi
+            # elif [[ ${DataType[$i]} == "string" ]]; then
+            #     if [[ $FieldValue =~ [^a-zA-Z0-9_] ]]; then
+            #         echo "Invalid input. Please enter a valid string for ${Name[$i]}."
+            #         continue
+            #     fi
+            # fi
             elif [[ ${DataType[$i]} == "string" ]]; then
                 FieldName=$(is_valid_name "$FieldName")
 
@@ -92,7 +102,7 @@ insert_into_table() {
                 flag=0
                 values=($(awk -F: -v col=$((i + 1)) '$1 !~ /^#/ {print $col}' "$DBName/$TableName"))
                 for value in "${values[@]}"; do
-                    if [[ $FieldName == "$value" ]]; then
+                    if [[ $FieldValue == "$value" ]]; then
                         flag=1
                         break
                     fi
@@ -106,9 +116,9 @@ insert_into_table() {
 
             # Append field value to the table
             if [[ $i == 0 ]]; then
-                echo -n "$FieldName" >>"$DBName/$TableName"
+                echo -n "$FieldValue" >>"$DBName/$TableName"
             else
-                echo -n ":$FieldName" >>"$DBName/$TableName"
+                echo -n ":$FieldValue" >>"$DBName/$TableName"
             fi
 
             break
@@ -122,5 +132,3 @@ insert_into_table() {
     sleep 2
     mainmenu
 }
-
-# insert_into_table

@@ -10,19 +10,18 @@ create_table() {
         return
     fi
 
-    # pwd
+    # Navigate to the database directory
     cd "$db_path" || {
-        echo "Failed to navigate to database directory."
+        echo "Failed to navigate to the database directory."
         return
     }
-    # pwd
 
     local tablename
     while true; do
         read -p "Enter table name: " tablename
         tablename=$(is_valid_name "$tablename")
 
-        if [[ "$tablename" = "1" ]]; then
+        if [[ "$tablename" == "1" ]]; then
             echo "Invalid table name. Only alphanumeric characters and underscores are allowed. Please try again."
         elif file_exists "$tablename"; then
             echo "Table '$tablename' already exists. Please try again."
@@ -31,17 +30,16 @@ create_table() {
         fi
     done
 
-    # Start writing metadata
-    printf "# " >>"$tablename"
+    # Loop to enter each field's name, data type, and primary key status
+    local field_definitions=()
 
-    # Loop to enter each field's name and data type
     while true; do
         read -p "Enter the number of fields: " numFields
 
         if is_integer "$numFields"; then
             break
         else
-            echo "Invalid number of fields."
+            echo "Invalid number of fields. Please enter a valid integer."
         fi
     done
 
@@ -51,10 +49,9 @@ create_table() {
             modifiedFieldName=$(is_valid_name "$FieldName")
 
             if [[ "$modifiedFieldName" != "1" ]]; then
-                printf "$modifiedFieldName:" >>"$tablename"
                 break
             else
-                echo "Invalid column name."
+                echo "Invalid column name. Only alphanumeric characters and underscores are allowed."
             fi
         done
 
@@ -64,14 +61,14 @@ create_table() {
             checkDataType=$(check_dataType "$DataType")
 
             if [[ "$checkDataType" != "1" ]]; then
-                re=$(echo "$DataType" | tr '[:upper:]' '[:lower:]')
-                printf "$re:" >>"$tablename"
+                DataType=$(echo "$DataType" | tr '[:upper:]' '[:lower:]')
                 break
             else
-                echo "Invalid datatype."
+                echo "Invalid datatype. Please enter 'string' or 'int'."
             fi
         done
 
+        # Check if this field should be a primary key
         if [[ $oneFlag == 0 ]]; then
             while true; do
                 read -p "Is field $i a primary key? (y/n): " IsPrimaryKey
@@ -79,19 +76,23 @@ create_table() {
 
                 if [[ "$modifiedYesNo" != "1" ]]; then
                     if [ "$modifiedYesNo" == "y" ]; then
-                        printf "pk " >>"$tablename"
+                        field_definitions+=("${modifiedFieldName}:${DataType}:pk")
                         oneFlag=1
-                        break
                     else
-                        break
+                        field_definitions+=("${modifiedFieldName}:${DataType}")
                     fi
+                    break
                 else
-                    echo "Invalid response."
+                    echo "Invalid response. Please enter 'y' for yes or 'n' for no."
                 fi
             done
+        else
+            field_definitions+=("${modifiedFieldName}:${DataType}")
         fi
-        printf "\n# " >>"$tablename"
     done
+
+    # Write field definitions to the table file with the new format
+    printf "# %s\n" "$(IFS=';'; echo "${field_definitions[*]}")" > "$tablename"
 
     echo "Table '$tablename' created successfully in the '$db_path' database."
 
