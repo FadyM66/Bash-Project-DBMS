@@ -34,19 +34,13 @@ file_exists() {
 
 is_integer() {
     if [[ "$1" =~ ^-?[0-9]+$ ]]; then
-        return 0
+        echo "-1"  
     else
-        return 1
+        echo "1"   
     fi
 }
 
-is_float() {
-    if [[ "$1" =~ ^-?[0-9]*\.[0-9]+$ ]]; then
-        return 0
-    else
-        return 1
-    fi
-}
+
 
 is_string() {
     if [[ "$1" =~ ^[a-zA-Z0-9_[:space:]]+$ ]]; then
@@ -55,8 +49,17 @@ is_string() {
         return 1
     fi
 }
+is_valid_boolean() {
+    case $1 in
+    [tT][rR][uU][eE] | [fF][aA][lL][sS][eE] | 0 | 1)
+        echo "-1"  # Valid boolean signal
+        ;;
+    *)
+        echo "1"   # Invalid boolean signal
+        ;;
+    esac
+}
 
-# Validate if the input matches a specified type (int, float, string)
 validate_value() {
     local value=$1
     local type=$2
@@ -80,7 +83,6 @@ validate_value() {
     esac
 }
 
-# Validate column types (for use in create_table and insert_into_table)
 validate_column_type() {
     local column_type=$1
     case $column_type in
@@ -93,7 +95,6 @@ validate_column_type() {
     esac
 }
 
-# alaa function
 check_name() {
     case $1 in
     [a-zA-Z_]*([a-zA-Z0-9_[:space:]]))
@@ -108,7 +109,7 @@ check_name() {
 }
 check_dataType() {
     case $1 in
-    [iI][nN][tT] | [sS][tT][rR][iI][nN][gG])
+    [iI][nN][tT] | [sS][tT][rR][iI][nN][gG] | [bB][oO][oO][lL][eE][aA][nN])
         echo "-1"
         ;;
     *)

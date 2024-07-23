@@ -35,8 +35,8 @@ create_table() {
 
     while true; do
         read -p "Enter the number of fields: " numFields
-
-        if is_integer "$numFields"; then
+        checkValue=$(is_integer "$numFields")
+        if [[ $checkValue != 1 ]]; then
             break
         else
             echo "Invalid number of fields. Please enter a valid integer."
@@ -56,7 +56,7 @@ create_table() {
         done
 
         while true; do
-            read -p "Enter the datatype of field $i (string/int): " DataType
+            read -p "Enter the datatype of field $i (string/int/boolean): " DataType
 
             checkDataType=$(check_dataType "$DataType")
 
@@ -64,7 +64,7 @@ create_table() {
                 DataType=$(echo "$DataType" | tr '[:upper:]' '[:lower:]')
                 break
             else
-                echo "Invalid datatype. Please enter 'string' or 'int'."
+                echo "Invalid datatype. Please enter 'string', 'int', or 'boolean'."
             fi
         done
 

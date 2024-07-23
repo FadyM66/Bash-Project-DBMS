@@ -71,22 +71,15 @@ insert_into_table() {
     # Loop to get values for each field
     for ((i = 0; i < numOfFields; i++)); do
         while true; do
-            read -p "Enter value for ${Name[$i]}: " FieldValue
+            read -p "Enter value for ${Name[$i]}: " FieldName
 
-            # Check data type
             if [[ ${DataType[$i]} == "int" ]]; then
-                checkValue=$(check_is_int "$FieldValue")
+                checkValue=$(is_integer "$FieldName")
 
                 if [[ $checkValue == 1 ]]; then
                     echo "Invalid input. Please enter an integer for ${Name[$i]}."
                     continue
                 fi
-            # elif [[ ${DataType[$i]} == "string" ]]; then
-            #     if [[ $FieldValue =~ [^a-zA-Z0-9_] ]]; then
-            #         echo "Invalid input. Please enter a valid string for ${Name[$i]}."
-            #         continue
-            #     fi
-            # fi
             elif [[ ${DataType[$i]} == "string" ]]; then
                 FieldName=$(is_valid_name "$FieldName")
 
@@ -95,14 +88,21 @@ insert_into_table() {
                     continue
                 fi
 
-            fi
+            elif [[ ${DataType[$i]} == "boolean" ]]; then
+                checkValue=$(is_valid_boolean "$FieldName")
+
+                if [[ $checkValue == 1 ]]; then
+                    echo "Invalid input. Please enter 'true', 'false', '1', or '0' for ${Name[$i]}."
+                    continue
+                fi
+            fi                        
 
             # Handle primary key uniqueness check
             if [[ ${PK[$i]} == "pk" ]]; then
                 flag=0
                 values=($(awk -F: -v col=$((i + 1)) '$1 !~ /^#/ {print $col}' "$DBName/$TableName"))
                 for value in "${values[@]}"; do
-                    if [[ $FieldValue == "$value" ]]; then
+                    if [[ $FieldName == "$value" ]]; then
                         flag=1
                         break
                     fi
@@ -116,14 +116,15 @@ insert_into_table() {
 
             # Append field value to the table
             if [[ $i == 0 ]]; then
-                echo -n "$FieldValue" >>"$DBName/$TableName"
+                echo -n "$FieldName" >>"$DBName/$TableName"
             else
-                echo -n ":$FieldValue" >>"$DBName/$TableName"
+                echo -n ":$FieldName" >>"$DBName/$TableName"
             fi
 
             break
         done
     done
+
 
     # Add a newline at the end of the record
     echo "" >>"$DBName/$TableName"
