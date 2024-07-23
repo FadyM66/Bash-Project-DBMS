@@ -1,15 +1,16 @@
 #!/usr/bin/bash
 
 # Source other function scripts
+# source ./validation.sh
 source ./create_database.sh
 source ./list_databases.sh
 source ./create_table.sh
 source ./list_tables.sh
-source ./drop_table.sh
+# source ./drop_table.sh
 source ./insert_into_table.sh
-source ./select_from_table.sh
-source ./delete_from_table.sh
-source ./update_table.sh
+# source ./select_from_table.sh
+# source ./delete_from_table.sh
+# source ./update_table.sh
 
 # Welcome 
 
@@ -111,7 +112,7 @@ connectmenu(){
         1) create_table "$choosendb";;
         2) list_tables "$choosendb";;
         3) echo "number 3";;
-        4) echo "number 4";;
+        4) insert_into_table "$choosendb";;
         5) echo "number 5";;
         6) echo "number 6";;
         7) echo "number 7";;

@@ -1,7 +1,9 @@
 #!/bin/bash
+source ./validation.sh
 
 create_table() {
     local db_path=$1
+    local oneFlag=0
 
     if [ ! -d "$db_path" ]; then
         echo "Invalid database path '$db_path'."
@@ -18,9 +20,9 @@ create_table() {
     local tablename
     while true; do
         read -p "Enter table name: " tablename
-        tablename=$(sanitize_name "$tablename")
+        tablename=$(is_valid_name "$tablename")
 
-        if ! is_valid_name "$tablename"; then
+        if [[ "$tablename" = "1" ]]; then
             echo "Invalid table name. Only alphanumeric characters and underscores are allowed. Please try again."
         elif file_exists "$tablename"; then
             echo "Table '$tablename' already exists. Please try again."
@@ -29,51 +31,71 @@ create_table() {
         fi
     done
 
-    local columns
-    local primary_key
+    # Start writing metadata
+    printf "# " >>"$tablename"
+
+    # Loop to enter each field's name and data type
     while true; do
-        read -p "Enter columns (name:type) separated by semicolon (e.g., id:int;name:string;age:float): " columns
+        read -p "Enter the number of fields: " numFields
 
-        if [[ "$columns" != *";"* ]]; then
-            echo "Invalid input. The columns must be separated by a semicolon (;). Please try again."
-            continue
-        fi
-
-        IFS=';' read -r -a colarray <<<"$columns"
-        local valid=true
-        local col_names=()
-        for col in "${colarray[@]}"; do
-            name=$(echo "$col" | cut -d: -f1)
-            type=$(echo "$col" | cut -d: -f2)
-            if ! is_valid_name "$name"; then
-                echo "Invalid column name '$name'. Only alphanumeric characters and underscores are allowed. Please try again."
-                valid=false
-                break
-            fi
-            if [[ "$type" != "int" && "$type" != "float" && "$type" != "string" ]]; then
-                echo "Invalid column type '$type'. Only 'int', 'float', and 'string' are allowed. Please try again."
-                valid=false
-                break
-            fi
-            col_names+=("$name")
-        done
-        if $valid; then
-            while true; do
-                read -p "Enter the name of the primary key column: " primary_key
-                if [[ " ${col_names[@]} " =~ " ${primary_key} " ]]; then
-                    break
-                else
-                    echo "Invalid primary key column name. Please enter one of the column names."
-                fi
-            done
+        if is_integer "$numFields"; then
             break
+        else
+            echo "Invalid number of fields."
         fi
     done
 
-    echo "$columns;primary_key:$primary_key" >"$tablename"
-    echo "Table '$tablename' with primary key '$primary_key' created successfully in the '$db_path' database."
+    for ((i = 1; i <= numFields; i++)); do
+        while true; do
+            read -p "Enter the name of field $i: " FieldName
+            modifiedFieldName=$(is_valid_name "$FieldName")
 
-    sleep 3
+            if [[ "$modifiedFieldName" != "1" ]]; then
+                printf "$modifiedFieldName:" >>"$tablename"
+                break
+            else
+                echo "Invalid column name."
+            fi
+        done
+
+        while true; do
+            read -p "Enter the datatype of field $i (string/int): " DataType
+
+            checkDataType=$(check_dataType "$DataType")
+
+            if [[ "$checkDataType" != "1" ]]; then
+                re=$(echo "$DataType" | tr '[:upper:]' '[:lower:]')
+                printf "$re:" >>"$tablename"
+                break
+            else
+                echo "Invalid datatype."
+            fi
+        done
+
+        if [[ $oneFlag == 0 ]]; then
+            while true; do
+                read -p "Is field $i a primary key? (y/n): " IsPrimaryKey
+                modifiedYesNo=$(check_yesNo "$IsPrimaryKey")
+
+                if [[ "$modifiedYesNo" != "1" ]]; then
+                    if [ "$modifiedYesNo" == "y" ]; then
+                        printf "pk " >>"$tablename"
+                        oneFlag=1
+                        break
+                    else
+                        break
+                    fi
+                else
+                    echo "Invalid response."
+                fi
+            done
+        fi
+        printf "\n# " >>"$tablename"
+    done
+
+    echo "Table '$tablename' created successfully in the '$db_path' database."
+
+    sleep 2
     cd ..
     mainmenu
 }
