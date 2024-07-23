@@ -85,4 +85,4 @@ insert_into_table() {
     echo "Record inserted successfully."
 }
 
-insert_into_table
+# insert_into_table

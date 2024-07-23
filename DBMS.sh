@@ -6,7 +6,7 @@ source ./create_database.sh
 source ./list_databases.sh
 source ./create_table.sh
 source ./list_tables.sh
-# source ./drop_table.sh
+source ./drop_table.sh
 source ./insert_into_table.sh
 # source ./select_from_table.sh
 # source ./delete_from_table.sh
@@ -111,7 +111,7 @@ connectmenu(){
         case $x in
         1) create_table "$choosendb";;
         2) list_tables "$choosendb";;
-        3) echo "number 3";;
+        3) drop_table "$choosendb";;
         4) insert_into_table "$choosendb";;
         5) echo "number 5";;
         6) echo "number 6";;
