@@ -5,7 +5,7 @@
 
 source ./validation.sh
 source ./select_from_table.sh
-
+source ./update_table.sh
 
 # Welcome 
 
@@ -114,7 +114,7 @@ connectmenu(){
             4) welcome;insert_into_table "$choosendb";;
             5) select_from_table;;
             6) maindeletefromtable;;
-            7) welcome;update_table;;
+            7) mainupdate;;
             00) return;;
             0) quit;;
             *) echo "Invalid Input"; sleep 1;;
@@ -840,6 +840,8 @@ get_rows() {
     done
     echo "      deleted rows : $dels"
 }
+
+# update table
 
 welcome
 echo
