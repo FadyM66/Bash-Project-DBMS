@@ -1,10 +1,12 @@
 #!/bin/bash
 shopt -s extglob
+shopt -s extglob
 
 is_valid_name() {
     if [[ "$1" =~ ^[a-zA-Z][a-zA-Z0-9_[:space:]]*$ ]]; then
         echo "$1" | tr -s ' ' '_'        
     else
+        echo "1"
         echo "1"
     fi
 }
@@ -33,10 +35,13 @@ file_exists() {
 is_integer() {
     if [[ "$1" =~ ^-?[0-9]+$ ]]; then
         echo "-1"  
+        echo "-1"  
     else
+        echo "1"   
         echo "1"   
     fi
 }
+
 
 
 
