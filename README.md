@@ -9,10 +9,7 @@ Welcome to the Bash Project DBMS! This project represents a database management 
 - [Introduction](#introduction)
 - [Contributing](#contributing)
 - [Features](#features)
-- [Installation](#installation)
 - [Usage](#usage)
-- [License](#license)
-- [Acknowledgements](#acknowledgements)
 
 ## Introduction
 
